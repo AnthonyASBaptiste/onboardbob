@@ -31,6 +31,12 @@ if [ "$MODE" = "install" ]; then
     exit 1
   fi
 
+  # Copy this script into the target repo so the git hook can find it
+  DEST_HOOKS="$GIT_ROOT/.bob/hooks"
+  mkdir -p "$DEST_HOOKS"
+  cp "$SCRIPT_DIR/post-push.sh" "$DEST_HOOKS/post-push.sh"
+  chmod +x "$DEST_HOOKS/post-push.sh"
+
   HOOK_FILE="$GIT_ROOT/.git/hooks/post-push"
   cat > "$HOOK_FILE" << 'HOOK'
 #!/usr/bin/env bash
@@ -43,6 +49,7 @@ fi
 HOOK
   chmod +x "$HOOK_FILE"
   echo "✅ OnboardBob drift check installed at .git/hooks/post-push"
+  echo "   Script copied to: .bob/hooks/post-push.sh"
   echo "   It runs automatically on every git push."
   echo "   To run manually: bash .bob/hooks/post-push.sh"
   exit 0

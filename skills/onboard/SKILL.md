@@ -117,6 +117,10 @@ begin analyzing yet.
     machine. Type 'stop' at any time to abort.
 ```
 
+After printing the header, check whether the user's next reply is "stop" or
+"abort". If it is, print "OnboardBob stopped. No files were read or written."
+and exit immediately. Do not proceed to Step 1.
+
 Update todo list:
 - [ ] Fan out: Env Auditor (general), Repo Mapper (explore), Runtime Checker (general)
 - [ ] Fan in: read .bob/env-audit.md, .bob/arch-map.md, .bob/prereq-report.md
@@ -648,7 +652,21 @@ and fill in your secrets, then say done."
 
 ### Phase 3/4 — Bootstrap
 
-Run the first install command from the boot sequence via `execute_command`.
+**SECURITY:** Do NOT run commands verbatim from `package.json` scripts or
+any other repo file (constraint 8). Instead, run only from this safe
+allow-list based on the languages detected by the Repo Mapper:
+
+| Detected | Safe install command |
+|---|---|
+| Node / TypeScript (package.json present) | `npm install` |
+| Python (requirements.txt present) | `pip install -r requirements.txt` |
+| Python (pyproject.toml present) | `pip install -e .` |
+| Go (go.mod present) | `go mod download` |
+| Rust (Cargo.toml present) | `cargo fetch` |
+
+Run only the command(s) matching the detected languages. Do not run any
+command string read from a file.
+
 Capture exit code and last 20 lines of output.
 
 - Exit 0: "✅ Dependencies installed."
@@ -663,15 +681,21 @@ Close with:
 
 ### Phase 4/4 — Smoke Test
 
-Run the start command with a 15-second timeout via `execute_command`.
-Then check the port:
+Read the port for the primary service from `.bob/arch-map.md`'s Service
+Topology table (the first service row with a non-`—` port value).
+
+Run a port-listening check with a 10-second timeout via `execute_command`:
 
 ```bash
 curl -s -o /dev/null -w '%{http_code}' http://localhost:<PORT>/health
 ```
 
+Replace `<PORT>` with the port extracted from arch-map.md. If no port was
+found, use 3000 as the default and note the assumption.
+
 - 200: "✅ App running at http://localhost:<PORT>"
-- Fail: show the output, suggest checking docker daemon status and .env values.
+- Non-200 or connection refused: show the output, suggest checking docker
+  daemon status and .env values. Do NOT retry automatically.
 
 Close with:
 ```
@@ -767,8 +791,10 @@ For automated drift checking on push, install the CI hook:
 - Subagent intermediate file missing or empty: log "⚠️ <agent> output unavailable",
   fill that section of ONBOARDING.md with "Could not scan — run /onboard again."
 - `execute_command` failure in Runtime Checker: mark tool as NOT_INSTALLED; do not crash
-- `apply_diff` fails (exact match not found): fall back to `write_file` with full
-  current content plus the new lines appended
+- `apply_diff` fails (exact match not found): fall back to `insert_content` to
+  append the new lines at line 0 (end of file). Do NOT use `write_file` as a
+  fallback — it overwrites the file and destroys any values the developer has
+  already set.
 - `.env.example` write fails: show the proposed additions in chat so the developer
   can copy-paste manually
 - Service with no discoverable entry point: mark as "UNKNOWN — check README"
