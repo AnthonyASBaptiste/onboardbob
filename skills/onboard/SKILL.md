@@ -99,12 +99,22 @@ Create the `.bob/` scratch directory for intermediate outputs using
 mkdir -p .bob
 ```
 
-Print a short header — this is the ONLY output before fan-in. Do NOT
+Print this header — this is the ONLY output before fan-in. Do NOT
 begin analyzing yet.
 
 ```
 🔍 OnboardBob starting on <SCAN_ROOT>
   Spawning 3 parallel agents: Env Auditor · Repo Mapper · Runtime Checker
+
+⚠️  Security notice: OnboardBob reads files from this repo and executes
+    version-check commands on your machine. If this is a repo from someone
+    you don't fully trust, stop here and re-run inside a throwaway VM or
+    container with no access to your real credentials, SSH keys, or cloud
+    accounts. Never run npm install / pip install from an untrusted repo
+    on your host machine.
+
+    Proceeding means you're comfortable running this scan on your current
+    machine. Type 'stop' at any time to abort.
 ```
 
 Update todo list:
