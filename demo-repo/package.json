@@ -1,0 +1,23 @@
+{
+  "name": "demo-api-platform",
+  "version": "1.0.0",
+  "description": "Demo API platform for OnboardBob",
+  "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "api",
+    "dashboard"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w api\" \"npm run dev -w dashboard\"",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "db:migrate": "cd api && npx prisma migrate dev",
+    "db:seed": "cd api && npx prisma db seed"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
