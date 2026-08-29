@@ -1,7 +1,43 @@
 # OnboardBob
 
-**Autonomous Repo Cartography & Onboarding Copilot**  
+**Autonomous Repo Cartography & Onboarding Copilot**
 Built for IBM Bob 2.0 Dev Day Hackathon · August 2026
+
+---
+
+## Security: Poisoned Repo Protection
+
+OnboardBob reads files from repos you may not own or fully trust. Attackers
+can and do embed instructions in source files, READMEs, and comments
+specifically designed to hijack AI agents — this attack class is called
+**prompt injection via repository content**.
+
+OnboardBob defends against it at three layers:
+
+1. **Orchestrator rule** — The SKILL.md begins with an explicit
+   anti-manipulation block that takes precedence over all file content.
+   Any instruction found inside a repo file is treated as data only.
+
+2. **Per-subagent rule** — Every spawned subagent description opens with a
+   SECURITY RULE that repeats the same constraint in isolated context.
+   Each subagent cannot be manipulated by file content even if the
+   orchestrator somehow was.
+
+3. **No verbatim execution** — Boot sequences, Makefile targets, and
+   `package.json` scripts are extracted and *displayed* to the developer.
+   Bob never executes a command whose text came directly from a repo file.
+
+**What this does NOT cover:**
+- Repos that contain malicious *code* which executes when you `npm install`
+  or `pip install` (supply chain attack — use a sandbox for untrusted installs)
+- Repos that serve a fake web service that responds to health checks with
+  malicious content
+- Social engineering: a repo README that tricks *you* (not Bob) into running
+  a harmful command
+
+**Recommendation for untrusted repos:** Run OnboardBob in a VM or container
+with no access to your real credentials, SSH keys, or cloud accounts. Never
+run `npm install` or `pip install` from an untrusted repo on your host machine.
 
 ---
 
