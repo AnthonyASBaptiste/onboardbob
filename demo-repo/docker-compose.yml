@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: demo_db
       POSTGRES_USER: demo_user
-      POSTGRES_PASSWORD: changeme_local_only
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local_only}
     ports:
       - "5432:5432"
     volumes:
@@ -22,7 +22,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - DATABASE_URL=postgresql://demo_user:changeme_local_only@postgres:5432/demo_db
+      - DATABASE_URL=postgresql://demo_user:${POSTGRES_PASSWORD:-changeme_local_only}@postgres:5432/demo_db
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=${JWT_SECRET}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -35,7 +35,7 @@ services:
     build: ./worker
     environment:
       - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://demo_user:changeme_local_only@postgres:5432/demo_db
+      - DATABASE_URL=postgresql://demo_user:${POSTGRES_PASSWORD:-changeme_local_only}@postgres:5432/demo_db
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - redis
