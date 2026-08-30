@@ -68,7 +68,7 @@ Scans every source file for environment variable references:
 Diffs discovered variables against `.env.example`.
 
 If `.env.example` is missing or stale:
-- Shows the exact diff (`+ REDIS_URL=... # used by worker/queue.ts:14`)
+- Shows the exact diff (`+ REDIS_URL=... # used by api/src/queue.ts:6`)
 - Asks for approval
 - Patches or creates the file
 
@@ -116,8 +116,8 @@ After fan-in, Bob asks once:
 ## Missing Before You Can Run
 | Variable        | Used in              | Status    |
 |-----------------|----------------------|-----------|
-| REDIS_URL       | worker/queue.ts:14   | ⚠️ missing |
-| OPENAI_API_KEY  | api/src/llm.ts:7     | ⚠️ missing |
+| REDIS_URL       | api/src/queue.ts:6   | ⚠️ missing |
+| OPENAI_API_KEY  | api/src/services/llm.ts:5 | ⚠️ missing |
 
 ## Exact Boot Sequence
 docker compose up -d postgres redis
